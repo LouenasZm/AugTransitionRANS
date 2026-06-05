@@ -1,0 +1,173 @@
+{
+    "cases": {
+        "training":   ["t3a"],
+        "validation": ["t3c3"]
+    },
+
+    "variables": ["uu", "duy"],
+
+    "coefficients": {
+        "n":        21,
+        "l_bounds": [ 0.0, -1.0, -1.0, -1.0,  0.0,
+                      0.0,  0.0,  0.0,  0.0,  0.0,
+                      0.0,  0.0,  0.0, -1.0, -1.0,
+                     -1.0,  0.0,  0.0,  0.0,  0.0, 0.0],
+        "u_bounds": [ 1.0,  1.0,  1.0,  1.0,  1.0,
+                      1.0,  1.0,  1.0,  1.0,  1.0,
+                      1.0,  1.0,  1.0,  1.0,  1.0,
+                      1.0,  1.0,  1.0,  1.0,  1.0,  1.0]
+    },
+
+    "paths": {
+        "surrogates": {
+            "t3a": {"uu": "/media/louenas/disk1/correct_pe_gamma/t3a/Surrogate/surrogate_99p9_uu.pkl",
+                    "duy": "/media/louenas/disk1/correct_pe_gamma/t3a/Surrogate/surrogate_99p9_duy.pkl"},
+            "t3b": {"uu": "/media/louenas/disk1/correct_pe_gamma/t3b/Surrogate/surrogate_99p9_uu.pkl",
+                    "duy": "/media/louenas/disk1/correct_pe_gamma/t3b/Surrogate/surrogate_99p9_duy.pkl"},
+            "t3c2": {"uu": "/media/louenas/disk1/correct_pe_gamma/t3c2/Surrogate/surrogate_99p9_uu.pkl",
+                    "duy": "/media/louenas/disk1/correct_pe_gamma/t3c2/Surrogate/surrogate_99p9_duy.pkl"},
+            "t3c3": {"uu": "/media/louenas/disk1/correct_pe_gamma/t3c3/Surrogate/surrogate_99p9_uu.pkl",
+                    "duy": "/media/louenas/disk1/correct_pe_gamma/t3c3/Surrogate/surrogate_99p9_duy.pkl"},
+            "t3c4": {"uu": "/media/louenas/disk1/correct_pe_gamma/t3c4/Surrogate/surrogate_99p9_uu.pkl",
+                    "duy": "/media/louenas/disk1/correct_pe_gamma/t3c4/Surrogate/surrogate_99p9_duy.pkl"},
+            "t3c5": {"uu": "/media/louenas/disk1/correct_pe_gamma/t3c5/Surrogate/surrogate_99p9_uu.pkl",
+                    "duy": "/media/louenas/disk1/correct_pe_gamma/t3c5/Surrogate/surrogate_99p9_duy.pkl"}
+        },
+
+        "scalers": {
+            "t3a":  "/media/louenas/disk1/correct_pe_gamma/t3a/Surrogate/cand_scaler.pkl",
+            "t3b":  "/media/louenas/disk1/correct_pe_gamma/t3b/Surrogate/cand_scaler.pkl",
+            "t3c5": "/media/louenas/disk1/correct_pe_gamma/t3c5/Surrogate/cand_scaler.pkl",
+            "t3c3": "/media/louenas/disk1/correct_pe_gamma/t3c3/Surrogate/cand_scaler.pkl"
+        }
+    },
+
+    "les": {
+        "t3a": {
+                "directory": "/media/louenas/disk1/ercoftac/t3a/les_old/",
+                "grid":
+                {
+                    "new_grid": false,
+                    "endianess": "big"
+                },
+                "case": "stbl"
+            },
+        "t3b": {
+                "directory": "/media/louenas/disk1/ercoftac/t3b/les/",
+                "grid":
+                {
+                    "new_grid": false,
+                    "endianess": "little"
+                },
+                "case": "stbl"
+                },
+        "t3c2": {
+                "directory": "/media/louenas/disk1/ercoftac/t3c2/les_250331/",
+                "grid":
+                {
+                    "new_grid": true,
+                    "endianess": "little"
+                },
+                "case": "stbl"
+            },
+        "t3c3": {
+                "directory": "/media/louenas/disk1/ercoftac/t3c3/les/les_six/",
+                "grid":
+                {
+                    "new_grid": true,
+                    "endianess": "little"
+                },
+                "case": "stbl"
+            },
+        
+        "t3c4": {
+                "directory": "/media/louenas/disk1/ercoftac/t3c4/old_les/t3c4_high_lf/",
+                "grid":
+                {
+                    "new_grid": true,
+                    "endianess": "little"
+                },
+                "case": "stbl"
+            },
+        "t3c5": {
+                "directory": "/media/louenas/disk1/ercoftac/t3c5/les/coarse/second_class/",
+                "grid":
+                {
+                    "new_grid": true,
+                    "endianess": "little"
+                },
+                "case": "stbl"
+            }
+    },
+
+    "baseline": {
+        "t3a": 
+        {
+            "directory": "/media/louenas/disk1/ercoftac/t3a/rans/komGammaWilcox/",
+            "grid":
+            {
+                "new_grid": true,
+                "endianess": "little"
+            },
+            "case": "stbl"
+        },
+        "t3b": 
+        {
+            "directory": "/media/louenas/disk1/ercoftac/t3b/rans/komGammaWilcox/",
+            "grid":
+            {
+                "new_grid": true,
+                "endianess": "little"
+            },
+            "case": "stbl"
+        },
+        "t3c2":{
+            "directory": "/media/louenas/disk1/ercoftac/t3c2/rans/komGamma/",
+            "grid":
+            {
+                "new_grid": true,
+                "endianess": "little"
+            },
+            "case": "stbl"
+        },
+        "t3c3":
+        {
+            "directory": "/media/louenas/disk1/ercoftac/t3c3/rans/komGamma/",
+            "grid":
+            {
+                "new_grid": true,
+                "endianess": "little"
+            },
+            "case": "stbl"
+        },
+        "t3c4":
+        {
+            "directory": "/media/louenas/disk1/ercoftac/t3c4/rans/komGamma/",
+            "grid":
+            {
+                "new_grid": true,
+                "endianess": "little"
+            },
+            "case": "stbl"
+        },
+        "t3c5":
+        {
+            "directory": "/media/louenas/disk1/ercoftac/t3c5/rans/komGamma/",
+            "grid":
+            {
+                "new_grid": true,
+                "endianess": "little"
+            },
+            "case": "stbl"
+        }
+    },
+
+    "ga": {
+        "leader":   { "pop_size": 40,  "n_gen": 25  },
+        "follower": { "pop_size": 100, "n_gen": 25 }
+    },
+
+    "n_jobs":           20,
+    "s_star_threshold": 0.6,
+    "output_dir":       "results"
+}

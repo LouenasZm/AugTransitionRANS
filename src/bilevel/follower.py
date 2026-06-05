@@ -1,6 +1,6 @@
 """
 
-
+    Author: Louenas Zemmour, Novemebr 2025, refactored on May 2026
 
 Follower (lower-level) problem for the bi-level optimisation framework.
 

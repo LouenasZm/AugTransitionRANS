@@ -1,4 +1,7 @@
 """
+
+    Author: Louenas Zemmour, Novemebr 2025, refactored on May 2026
+
 Leader (upper-level) problem for the bi-level optimisation framework.
 
 The leader minimises the validation MSE by choosing the regularisation

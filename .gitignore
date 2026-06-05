@@ -1,0 +1,6 @@
+.mypy*
+.pytest*
+__pycache__/*
+*/__pycache__/*
+src/*egg-info/*
+src/*/__pycache__/*

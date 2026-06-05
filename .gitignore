@@ -4,3 +4,4 @@ __pycache__/*
 */__pycache__/*
 src/*egg-info/*
 src/*/__pycache__/*
+examples/*/__pycache__/*

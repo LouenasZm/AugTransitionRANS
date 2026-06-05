@@ -1,4 +1,5 @@
-# Bi-Level Optimization for RANS Model Improvement
+# Bi-Level Optimisation for RANS Model Improvement
+
 
 Surrogate-assisted bi-level optimisation framework for improving RANS models from high-fidelity data.
 
@@ -9,7 +10,7 @@ The project combines:
 - elastic-net regularisation,
 - and a bi-level formulation used to tune the regularisation hyperparameters automatically.
 
-The lower level learns correction coefficients for the dictionary terms, while the upper level searches for the best regularisation strengths that generalise well on validation cases.
+The lower level learns correction coefficients for the dictionary terms, while the upper level searches for the best regularisation parameters that generalise well on validation cases.
 
 ## Author
 
@@ -44,10 +45,16 @@ tests/
 
 ## Requirements
 
-Install the runtime dependencies with:
+Install the package with pip:
 
 ```bash
-pip install -r requirements.txt
+pip install .
+```
+
+For development, use editable mode and include the test extra:
+
+```bash
+pip install -e ".[test]"
 ```
 
 Main dependencies:
@@ -65,15 +72,14 @@ The repository uses a source layout, so the easiest local setup is:
 
 ```bash
 git clone <your-github-repository-url>
-cd bi_level_optim
+cd AugTransitionRANS
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
-pip install -r requirements.txt
-export PYTHONPATH="$PWD/src"
+pip install -e ".[test]"
 ```
 
-If you want the environment variable to persist, add the `PYTHONPATH` line to your shell profile.
+This installs the project in editable mode, so you can import `bilevel_optim` directly without setting `PYTHONPATH`.
 
 ## Quick Start
 
@@ -95,11 +101,11 @@ See `tests/test_bilevel.py` for a self-contained synthetic example of the full p
 Run the smoke tests with:
 
 ```bash
-PYTHONPATH="$PWD/src" pytest -q
+pytest -q
 ```
 
 Or execute the standalone test script directly:
 
 ```bash
-PYTHONPATH="$PWD/src" python tests/test_bilevel.py
+python tests/test_bilevel.py
 ```

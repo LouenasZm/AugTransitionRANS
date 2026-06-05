@@ -60,7 +60,11 @@ def masked_normalised_mse(
     s_star_mask = s_star[finite_mask] < s_star_threshold
 
     les_masked  = les_val[finite_mask][s_star_mask, np.newaxis]  # (n_active, 1)
-    preds_masked = preds[s_star_mask]               # (n_active, n_cand)
+    if preds.shape[0] != les_val.shape[0]:
+        # Case where surrogates already trained on valid data only, so preds is already masked to (n_active, n_candidates)
+        preds_masked = preds[s_star_mask]               # (n_active, n_cand)
+    else:
+        preds_masked = preds[finite_mask][s_star_mask]  # (n_active, n_cand)
 
     mse = ((preds_masked - les_masked) ** 2).mean(axis=0)        # (n_cand,)
 

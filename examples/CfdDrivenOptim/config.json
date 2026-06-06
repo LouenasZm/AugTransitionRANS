@@ -1,7 +1,7 @@
 {
     "cases": {
-        "training":   ["t3a"],
-        "validation": ["t3c3"]
+        "training":   ["t3a", "t3b", "t3c3"],
+        "validation": ["t3c5"]
     },
 
     "variables": ["uu", "duy"],
@@ -20,31 +20,31 @@
 
     "paths": {
         "surrogates": {
-            "t3a": {"uu": "/media/louenas/disk1/correct_pe_gamma/t3a/Surrogate/surrogate_99p9_uu.pkl",
-                    "duy": "/media/louenas/disk1/correct_pe_gamma/t3a/Surrogate/surrogate_99p9_duy.pkl"},
-            "t3b": {"uu": "/media/louenas/disk1/correct_pe_gamma/t3b/Surrogate/surrogate_99p9_uu.pkl",
-                    "duy": "/media/louenas/disk1/correct_pe_gamma/t3b/Surrogate/surrogate_99p9_duy.pkl"},
-            "t3c2": {"uu": "/media/louenas/disk1/correct_pe_gamma/t3c2/Surrogate/surrogate_99p9_uu.pkl",
-                    "duy": "/media/louenas/disk1/correct_pe_gamma/t3c2/Surrogate/surrogate_99p9_duy.pkl"},
-            "t3c3": {"uu": "/media/louenas/disk1/correct_pe_gamma/t3c3/Surrogate/surrogate_99p9_uu.pkl",
-                    "duy": "/media/louenas/disk1/correct_pe_gamma/t3c3/Surrogate/surrogate_99p9_duy.pkl"},
-            "t3c4": {"uu": "/media/louenas/disk1/correct_pe_gamma/t3c4/Surrogate/surrogate_99p9_uu.pkl",
-                    "duy": "/media/louenas/disk1/correct_pe_gamma/t3c4/Surrogate/surrogate_99p9_duy.pkl"},
-            "t3c5": {"uu": "/media/louenas/disk1/correct_pe_gamma/t3c5/Surrogate/surrogate_99p9_uu.pkl",
-                    "duy": "/media/louenas/disk1/correct_pe_gamma/t3c5/Surrogate/surrogate_99p9_duy.pkl"}
+            "t3a": {"uu": "/path/to/t3a/Surrogate/surrogate_99p9_uu.pkl",
+                    "duy": "/path/to/t3a/Surrogate/surrogate_99p9_duy.pkl"},
+            "t3b": {"uu": "/path/to/t3b/Surrogate/surrogate_99p9_uu.pkl",
+                    "duy": "/path/to/t3b/Surrogate/surrogate_99p9_duy.pkl"},
+            "t3c2": {"uu": "/path/to/t3c2/Surrogate/surrogate_99p9_uu.pkl",
+                    "duy": "/path/to/t3c2/Surrogate/surrogate_99p9_duy.pkl"},
+            "t3c3": {"uu": "/path/to/t3c3/Surrogate/surrogate_99p9_uu.pkl",
+                    "duy": "/path/to/t3c3/Surrogate/surrogate_99p9_duy.pkl"},
+            "t3c4": {"uu": "/path/to/t3c4/Surrogate/surrogate_99p9_uu.pkl",
+                    "duy": "/path/to/t3c4/Surrogate/surrogate_99p9_duy.pkl"},
+            "t3c5": {"uu": "/path/to/t3c5/Surrogate/surrogate_99p9_uu.pkl",
+                    "duy": "/path/to/t3c5/Surrogate/surrogate_99p9_duy.pkl"}
         },
 
         "scalers": {
-            "t3a":  "/media/louenas/disk1/correct_pe_gamma/t3a/Surrogate/cand_scaler.pkl",
-            "t3b":  "/media/louenas/disk1/correct_pe_gamma/t3b/Surrogate/cand_scaler.pkl",
-            "t3c5": "/media/louenas/disk1/correct_pe_gamma/t3c5/Surrogate/cand_scaler.pkl",
-            "t3c3": "/media/louenas/disk1/correct_pe_gamma/t3c3/Surrogate/cand_scaler.pkl"
+            "t3a":  "/path/to/t3a/Surrogate/cand_scaler.pkl",
+            "t3b":  "/path/to/t3b/Surrogate/cand_scaler.pkl",
+            "t3c5": "/path/to/t3c5/Surrogate/cand_scaler.pkl",
+            "t3c3": "/path/to/t3c3/Surrogate/cand_scaler.pkl"
         }
     },
 
     "les": {
         "t3a": {
-                "directory": "/media/louenas/disk1/ercoftac/t3a/les_old/",
+                "directory": "/path/to/t3a/les/",
                 "grid":
                 {
                     "new_grid": false,
@@ -53,7 +53,7 @@
                 "case": "stbl"
             },
         "t3b": {
-                "directory": "/media/louenas/disk1/ercoftac/t3b/les/",
+                "directory": "/path/to/t3b/les/",
                 "grid":
                 {
                     "new_grid": false,
@@ -62,7 +62,7 @@
                 "case": "stbl"
                 },
         "t3c2": {
-                "directory": "/media/louenas/disk1/ercoftac/t3c2/les_250331/",
+                "directory": "/path/to/t3c2/les/",
                 "grid":
                 {
                     "new_grid": true,
@@ -71,7 +71,7 @@
                 "case": "stbl"
             },
         "t3c3": {
-                "directory": "/media/louenas/disk1/ercoftac/t3c3/les/les_six/",
+                "directory": "/path/to/t3c3/les/les/",
                 "grid":
                 {
                     "new_grid": true,
@@ -81,7 +81,7 @@
             },
         
         "t3c4": {
-                "directory": "/media/louenas/disk1/ercoftac/t3c4/old_les/t3c4_high_lf/",
+                "directory": "/path/to/t3c4/les/",
                 "grid":
                 {
                     "new_grid": true,
@@ -90,7 +90,7 @@
                 "case": "stbl"
             },
         "t3c5": {
-                "directory": "/media/louenas/disk1/ercoftac/t3c5/les/coarse/second_class/",
+                "directory": "/path/to/t3c5/les/",
                 "grid":
                 {
                     "new_grid": true,
@@ -103,7 +103,7 @@
     "baseline": {
         "t3a": 
         {
-            "directory": "/media/louenas/disk1/ercoftac/t3a/rans/komGammaWilcox/",
+            "directory": "/path/to/t3a/rans/komGammaWilcox/",
             "grid":
             {
                 "new_grid": true,
@@ -113,7 +113,7 @@
         },
         "t3b": 
         {
-            "directory": "/media/louenas/disk1/ercoftac/t3b/rans/komGammaWilcox/",
+            "directory": "/path/to/t3b/rans/komGammaWilcox/",
             "grid":
             {
                 "new_grid": true,
@@ -122,7 +122,7 @@
             "case": "stbl"
         },
         "t3c2":{
-            "directory": "/media/louenas/disk1/ercoftac/t3c2/rans/komGamma/",
+            "directory": "/path/to/t3c2/rans/komGamma/",
             "grid":
             {
                 "new_grid": true,
@@ -132,7 +132,7 @@
         },
         "t3c3":
         {
-            "directory": "/media/louenas/disk1/ercoftac/t3c3/rans/komGamma/",
+            "directory": "/path/to/t3c3/rans/komGamma/",
             "grid":
             {
                 "new_grid": true,
@@ -142,7 +142,7 @@
         },
         "t3c4":
         {
-            "directory": "/media/louenas/disk1/ercoftac/t3c4/rans/komGamma/",
+            "directory": "/path/to/t3c4/rans/komGamma/",
             "grid":
             {
                 "new_grid": true,
@@ -152,7 +152,7 @@
         },
         "t3c5":
         {
-            "directory": "/media/louenas/disk1/ercoftac/t3c5/rans/komGamma/",
+            "directory": "/path/to/t3c5/rans/komGamma/",
             "grid":
             {
                 "new_grid": true,

@@ -36,6 +36,7 @@ Usage example
 from __future__ import annotations
 
 import logging
+from logging import config
 from typing import Any, Dict, List, Sequence, Tuple
 
 import numpy as np

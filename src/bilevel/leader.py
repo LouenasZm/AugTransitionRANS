@@ -37,6 +37,7 @@ from joblib import Parallel, delayed, dump, load
 from pymoo.algorithms.soo.nonconvex.ga import GA
 from pymoo.core.problem import Problem
 from pymoo.optimize import minimize
+from pymoo.termination.default import DefaultSingleObjectiveTermination
 
 from .follower import ElasticNetFollower, OptimizationCallback
 from .loss import compute_normalised_loss
@@ -56,14 +57,21 @@ def run_follower_worker(
     n_var:          int,
     bounds:         Tuple[List[float], List[float]],
     *,
-    pop_size:       int   = 300,
-    n_gen:          int   = 250,
+    pop_size:         int   = 300,
+    n_gen:            int   = 250,
+    ftol:             float = 1e-5,
+    xtol:             float = 1e-6,
+    period:           int   = 20,
     s_star_threshold: float = 0.8,
 ) -> np.ndarray:
     """Solve one follower problem and return the optimal coefficients.
 
-    Designed to be called from joblib.Parallel; all arguments are explicit
-    to avoid pickling self.
+    Designed to be called from ``joblib.Parallel``; all arguments are explicit
+    to avoid pickling ``self``.
+
+    Early stopping fires when both the objective change (``ftol``) and the
+    design-space change (``xtol``) fall below their thresholds over the last
+    ``period`` generations, or when ``n_gen`` hard cap is reached.
     """
     problem = ElasticNetFollower(
         hyperparams=hyperparams,
@@ -75,7 +83,14 @@ def run_follower_worker(
         s_star_threshold=s_star_threshold,
     )
     algorithm = GA(pop_size=pop_size, eliminate_duplicates=True)
-    res = minimize(problem, algorithm, ("n_gen", n_gen), verbose=False)
+    termination = DefaultSingleObjectiveTermination(
+        xtol=xtol,
+        cvtol=1e-6,
+        ftol=ftol,
+        period=period,
+        n_max_gen=n_gen,    # hard cap — never exceeds your original budget
+    )
+    res = minimize(problem, algorithm, termination, verbose=False)
     return res.X
 
 
@@ -130,12 +145,15 @@ class LeaderGA(Problem):
         n_coefficients:    int,
         bounds:            Tuple[List[float], List[float]],
         *,
-        hyperparam_bounds: Tuple[List[float], List[float]] = ([0.0, 0.0], [1.0, 1.0]),
-        follower_pop_size: int   = 300,
-        follower_n_gen:    int   = 250,
-        n_jobs:            int   = 1,
-        s_star_threshold:  float = 0.8,
-        use_memmap:        bool  = True,
+        hyperparam_bounds:    Tuple[List[float], List[float]] = ([0.0, 0.0], [1.0, 1.0]),
+        follower_pop_size:    int   = 300,
+        follower_n_gen:       int   = 250,
+        follower_ftol:        float = 1e-5,
+        follower_xtol:        float = 1e-6,
+        follower_period:      int   = 20,
+        n_jobs:               int   = 1,
+        s_star_threshold:     float = 0.8,
+        use_memmap:           bool  = True,
     ) -> None:
         hl, hu = hyperparam_bounds
         super().__init__(
@@ -152,6 +170,9 @@ class LeaderGA(Problem):
         self.coeff_bounds      = bounds
         self.follower_pop_size = follower_pop_size
         self.follower_n_gen    = follower_n_gen
+        self.follower_ftol     = follower_ftol
+        self.follower_xtol     = follower_xtol
+        self.follower_period   = follower_period
         self.n_jobs            = n_jobs
         self.s_star_threshold  = s_star_threshold
 
@@ -214,6 +235,9 @@ class LeaderGA(Problem):
                     self.coeff_bounds,
                     pop_size=self.follower_pop_size,
                     n_gen=self.follower_n_gen,
+                    ftol=self.follower_ftol,
+                    xtol=self.follower_xtol,
+                    period=self.follower_period,
                     s_star_threshold=self.s_star_threshold,
                 )
                 for i in range(n_candidates)
@@ -302,9 +326,16 @@ class LeaderGA(Problem):
             pop_size=self.follower_pop_size,
             eliminate_duplicates=True,
         )
+        termination = DefaultSingleObjectiveTermination(
+            xtol=self.follower_xtol,
+            cvtol=1e-6,
+            ftol=self.follower_ftol,
+            period=self.follower_period,
+            n_max_gen=self.follower_n_gen,
+        )
         res = minimize(
             problem, algorithm,
-            ("n_gen", self.follower_n_gen),
+            termination,
             verbose=False,
         )
         return res.X

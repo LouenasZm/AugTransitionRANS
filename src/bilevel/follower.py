@@ -1,6 +1,6 @@
 """
 
-    Author: Louenas Zemmour, Novemebr 2025, refactored on May 2026
+    Author: L. Zemmour, Novemebr 2025, refactored on May 2026
 
 Follower (lower-level) problem for the bi-level optimisation framework.
 
@@ -36,6 +36,7 @@ Usage example
 from __future__ import annotations
 
 import logging
+from logging import config
 from typing import Any, Dict, List, Sequence, Tuple
 
 import numpy as np

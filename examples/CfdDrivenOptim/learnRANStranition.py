@@ -2,7 +2,7 @@
 Example script — bi-level elastic-net hyperparameter optimisation
 using surrogate-based RANS model correction.
 
-Author : Louenas Zemmour
+Author : L. Zemmour
 Date   : November, 2025. Refactored in June 2026
 
 Usage

@@ -1,6 +1,6 @@
 """
 
-    Author: Louenas Zemmour, Novemebr 2025, refactored on May 2026
+    Author: L. Zemmour, Novemeber 2025, refactored on May 2026
 
 Leader (upper-level) problem for the bi-level optimisation framework.
 
@@ -34,7 +34,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 from joblib import Parallel, delayed, dump, load
-from pymoo.algorithms.soo.nonconvex.ga import GA
+from pymoo.algorithms.soo.nonconvex.ga import DE
+from pymoo.operators.sampling.lhs import LHS
 from pymoo.core.problem import Problem
 from pymoo.optimize import minimize
 from pymoo.termination.default import DefaultSingleObjectiveTermination
@@ -82,7 +83,16 @@ def run_follower_worker(
         n_var=n_var,
         s_star_threshold=s_star_threshold,
     )
-    algorithm = GA(pop_size=pop_size, eliminate_duplicates=True)
+    algorithm = DE(
+                pop_size=210, 
+                sampling=LHS(),
+                variant="DE/rand/1/bin",
+                CR=0.9,
+                F=0.8,
+                dither="vector",
+                jitter=False,
+        )
+
     termination = DefaultSingleObjectiveTermination(
         xtol=xtol,
         cvtol=1e-6,

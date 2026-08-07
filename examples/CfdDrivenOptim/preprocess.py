@@ -1,5 +1,5 @@
 """
-    Author: Louenas Zemmour
+    Author: L. Zemmour
     Date:   August 2025
 
     Module to preprocess ERCOFTAC dataset, used before training surrogate models 

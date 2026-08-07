@@ -202,7 +202,7 @@ def test_compute_normalised_loss():
 def test_follower_optimize():
     """Full ElasticNetFollower optimisation — just check it converges."""
     from bilevel_optim import ElasticNetFollower, OptimizationCallback
-    from pymoo.algorithms.soo.nonconvex.ga import GA
+    from pymoo.algorithms.soo.nonconvex.de import DE
     from pymoo.optimize import minimize
 
     fd, _, train_cases, _, bounds = make_synthetic_data(n_features=5)
@@ -218,7 +218,7 @@ def test_follower_optimize():
     callback = OptimizationCallback()
     res = minimize(
         problem,
-        GA(pop_size=20, eliminate_duplicates=True),
+        DE(pop_size=20, eliminate_duplicates=True),
         ("n_gen", 10),
         callback=callback,
         verbose=False,
@@ -235,7 +235,7 @@ def test_follower_optimize():
 def test_follower_callback_fields():
     """Callback history dicts must have the required keys."""
     from bilevel_optim import ElasticNetFollower, OptimizationCallback
-    from pymoo.algorithms.soo.nonconvex.ga import GA
+    from pymoo.algorithms.soo.nonconvex.de import DE
     from pymoo.optimize import minimize
 
     fd, _, train_cases, _, bounds = make_synthetic_data(n_features=5)
@@ -248,7 +248,7 @@ def test_follower_callback_fields():
         n_var=5,
     )
     callback = OptimizationCallback()
-    minimize(problem, GA(pop_size=15), ("n_gen", 5), callback=callback, verbose=False)
+    minimize(problem, DE(pop_size=15), ("n_gen", 5), callback=callback, verbose=False)
 
     required = {"generation", "best_candidate", "best_objective",
                 "worst_candidate", "worst_objective", "mean_objective"}

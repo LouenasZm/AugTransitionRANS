@@ -34,7 +34,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 from joblib import Parallel, delayed, dump, load
-from pymoo.algorithms.soo.nonconvex.ga import DE
+from pymoo.algorithms.soo.nonconvex.de import DE
 from pymoo.operators.sampling.lhs import LHS
 from pymoo.core.problem import Problem
 from pymoo.optimize import minimize

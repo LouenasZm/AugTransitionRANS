@@ -218,7 +218,7 @@ def test_follower_optimize():
     callback = OptimizationCallback()
     res = minimize(
         problem,
-        DE(pop_size=20, eliminate_duplicates=True),
+        DE(pop_size=20),
         ("n_gen", 10),
         callback=callback,
         verbose=False,

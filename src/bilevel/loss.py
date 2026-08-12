@@ -101,7 +101,6 @@ def compute_normalised_loss(
         * "les"        — {case: {var: array, "S_star": array}}
         * "baseline"   — {"loss": {case: {var: float}}}  *or*
                               {case: {var: float}} (leader form)
-        * "scalers"    — {case: scaler}
     s_star_threshold:
         Threshold for the S* region mask.
 
@@ -120,14 +119,12 @@ def compute_normalised_loss(
         return b[case][var]
 
     for case in cases:
-        scaler      = data["scalers"][case]
-        x_scaled    = scaler.transform(x)
         les_case    = data["les"][case]
         surr_case   = data["surrogates"][case]
         s_star_full = les_case["S_star"].flatten()
 
         for var in variables:
-            preds = surr_case[var].predict(x_scaled)  # shape may vary by model
+            preds = surr_case[var].predict(x)  # shape may vary by model
 
             # Normalise to (n_points, n_candidates)
             if preds.ndim == 1:

@@ -20,7 +20,6 @@ The test verifies:
 import sys
 import traceback
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import Ridge   # tiny surrogate: Ridge wraps predict()
 
 
@@ -64,7 +63,7 @@ def make_synthetic_data(
         rng = np.random.default_rng(42)
 
     def _build_data_dict(case_list):
-        d = {"surrogates": {}, "les": {}, "scalers": {}}
+        d = {"surrogates": {}, "les": {}}
         for c in case_list:
             weights = rng.standard_normal(n_features)
             d["surrogates"][c] = {}
@@ -80,11 +79,6 @@ def make_synthetic_data(
 
             # S_star: values in [0, 2] — roughly half below threshold 0.8
             d["les"][c]["S_star"] = rng.uniform(0, 2, n_points)
-
-            # Scaler fitted on random data of the right shape
-            X_dummy = rng.random((100, n_features))
-            scaler  = MinMaxScaler().fit(X_dummy)
-            d["scalers"][c] = scaler
 
         return d
 

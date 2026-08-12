@@ -89,7 +89,7 @@ from bilevel_optim import ElasticNetFollower, LeaderGA
 
 Typical workflow:
 
-1. Prepare training and validation data dictionaries with surrogate models, LES reference fields, scalers, and baselines.
+1. Prepare training and validation data dictionaries with surrogate models, LES reference fields and baselines.
 2. Instantiate `ElasticNetFollower` to solve the lower-level coefficient fitting problem.
 3. Instantiate `LeaderGA` to optimise the hyperparameters `(alpha, beta)`.
 4. Run `pymoo.optimize.minimize(...)` on either problem.

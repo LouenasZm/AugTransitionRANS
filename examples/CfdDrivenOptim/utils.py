@@ -63,17 +63,6 @@ def load_surrogates(
     return surrogates
 
 
-def load_scalers(
-                cases: list[str],
-                scaler_paths: dict,         # {case: path_str}
-            ) -> dict[str, Any]:
-    """Load joblib scalers (one per case)."""
-    scalers: dict = {}
-    for case in cases:
-        scalers[case] = joblib.load(scaler_paths[case])
-        logging.info("  Loaded scaler     case=%-8s  (%s)", case, scaler_paths[case])
-    return scalers
-
 
 def load_les(
                 cases: list[str],
@@ -129,11 +118,10 @@ def build_data_dicts(config: dict) -> tuple[dict, dict]:
     Returns
     -------
     leader_data : dict
-        Keys: surrogates, les, scalers, baseline
         All keyed by validation case names.
 
     follower_data : dict
-        Keys: surrogates, les, scalers, baseline
+        Keys: surrogates, les,  baseline
         baseline has sub-key "loss" as required by the follower.
         All keyed by training case names.
     """
@@ -146,7 +134,6 @@ def build_data_dicts(config: dict) -> tuple[dict, dict]:
     val_les        = load_les(validation_cases, variables.copy(), les_cfd=config["les"],
                               baseline_cfg=config["baseline"])
     val_surrogates = load_surrogates(validation_cases, variables.copy(), paths["surrogates"])
-    val_scalers    = load_scalers(validation_cases, paths["scalers"])
     val_baseline   = compute_baseline_losses(
         validation_cases, variables.copy(), config["baseline"], val_les
     )
@@ -154,7 +141,6 @@ def build_data_dicts(config: dict) -> tuple[dict, dict]:
     leader_data = {
         "surrogates": val_surrogates,
         "les":        val_les,
-        "scalers":    val_scalers,
         "baseline":   val_baseline,          # {case: {var: float}}
     }
 
@@ -162,7 +148,6 @@ def build_data_dicts(config: dict) -> tuple[dict, dict]:
     train_les        = load_les(training_cases, variables.copy(), les_cfd=config["les"],
                                 baseline_cfg=config["baseline"])
     train_surrogates = load_surrogates(training_cases, variables.copy(), paths["surrogates"])
-    train_scalers    = load_scalers(training_cases, paths["scalers"])
     train_baseline   = compute_baseline_losses(
         training_cases, variables.copy(), config["baseline"], train_les
     )
@@ -170,7 +155,6 @@ def build_data_dicts(config: dict) -> tuple[dict, dict]:
     follower_data = {
         "surrogates": train_surrogates,
         "les":        train_les,
-        "scalers":    train_scalers,
         "baseline":   {"loss": train_baseline},  # follower expects this nesting
     }
 

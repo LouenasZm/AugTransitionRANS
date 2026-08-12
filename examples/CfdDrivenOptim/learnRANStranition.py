@@ -19,7 +19,6 @@ The most important fields are:
     cases.validation  — list of case names used by the leader (leave-one-out)
     variables         — physical quantities predicted by the surrogates
     paths.surrogates  — {case: {var: "/path/to/surrogate.pkl"}}
-    paths.scalers     — {case: "/path/to/cand_scaler.pkl"}
     paths.les         — {case: "path/to/les/"}
     paths.baseline    — {case: ""path/to/baseline/"}
     coefficients.n    — number of correction coefficients (Gamma dimension)

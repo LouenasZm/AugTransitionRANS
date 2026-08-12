@@ -57,9 +57,8 @@ class ElasticNetFollower(Problem):
         Tuple ``(alpha, beta)`` — regularisation strengths for the L1 and
         (half) L2 terms, respectively.
     data:
-        Dictionary with keys ``"surrogates"``, ``"les"``, ``"baseline"``,
-        and ``"scalers"``.  See :mod:`bilevel_optim.types` for the expected
-        layout.
+        Dictionary with keys ``"surrogates"``, ``"les"``, ``"baseline"``.
+        See :mod:`bilevel_optim.types` for the expected layout.
     bounds:
         Tuple ``(lower, upper)`` of array-like, each of length ``n_var``.
     training_cases:

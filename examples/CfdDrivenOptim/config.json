@@ -32,13 +32,6 @@
                     "duy": "/path/to/t3c4/Surrogate/surrogate_99p9_duy.pkl"},
             "t3c5": {"uu": "/path/to/t3c5/Surrogate/surrogate_99p9_uu.pkl",
                     "duy": "/path/to/t3c5/Surrogate/surrogate_99p9_duy.pkl"}
-        },
-
-        "scalers": {
-            "t3a":  "/path/to/t3a/Surrogate/cand_scaler.pkl",
-            "t3b":  "/path/to/t3b/Surrogate/cand_scaler.pkl",
-            "t3c5": "/path/to/t3c5/Surrogate/cand_scaler.pkl",
-            "t3c3": "/path/to/t3c3/Surrogate/cand_scaler.pkl"
         }
     },
 

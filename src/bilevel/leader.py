@@ -118,7 +118,7 @@ class LeaderGA(Problem):
     ----------
     leader_data:
         Validation-split data dict with keys ``"surrogates"``, ``"les"``,
-        ``"baseline"``, ``"scalers"``.
+        ``"baseline"``.
     follower_data:
         Training-split data dict with the same structure plus an additional
         ``"baseline"`` sub-key ``"loss"``.
@@ -298,14 +298,12 @@ class LeaderGA(Problem):
         val_loss     = np.zeros(n_candidates)
 
         for case in self.validation_cases:
-            scaler           = self.leader_data["scalers"][case]
-            responses_scaled = scaler.transform(follower_responses)
             les_case         = self.leader_data["les"][case]
             surr_case        = self.leader_data["surrogates"][case]
             s_star_full      = les_case["S_star"].flatten()
 
             for var in self.variables:
-                preds = surr_case[var].predict(responses_scaled)
+                preds = surr_case[var].predict(follower_responses)
 
                 # Normalise to (n_points, n_candidates)
                 if preds.ndim == 1:

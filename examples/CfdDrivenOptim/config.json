@@ -162,5 +162,6 @@
 
     "n_jobs":           "auto",
     "s_star_threshold": 0.6,
-    "output_dir":       "results"
+    "output_dir":       "results",
+    "seed":             1
 }

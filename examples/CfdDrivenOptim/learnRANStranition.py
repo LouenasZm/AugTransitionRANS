@@ -30,6 +30,16 @@ The most important fields are:
                          else all local cores)
     s_star_threshold  — S* mask threshold (default 0.8)
     output_dir        — where to write results JSON and logs
+    seed              — RNG seed for a fresh run (default 1; ignored when
+                         resuming from a checkpoint, see below)
+
+Checkpoint / resume
+--------------------
+Every leader generation is checkpointed to ``<output_dir>/checkpoint.pkl``.
+If that file exists when this script starts, the run resumes from the last
+completed generation instead of starting over — just re-run the same
+command (e.g. after a SLURM job was killed for exceeding its time limit).
+The checkpoint is deleted once the run completes normally.
 """
 
 from __future__ import annotations
@@ -43,12 +53,12 @@ import warnings
 
 from pymoo.algorithms.soo.nonconvex.ga  import GA
 from pymoo.core.callback                import Callback
-from pymoo.optimize                     import minimize
 
 from utils import (setup_logging, build_data_dicts)
 
 # ----------------------------------------------------------------------------
 from bilevel_optim.leader import LeaderGA
+from bilevel.checkpoint import load_checkpoint, save_checkpoint
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 # ============================================================================
@@ -142,31 +152,66 @@ def run(config_: dict) -> dict:
     )
 
     # ------------------------------------------------------------------
-    # 4c.  Run the leader GA
+    # 4c.  Run the leader GA, resuming from a checkpoint if one exists
     # ------------------------------------------------------------------
-    leader_algo = GA(
-        pop_size=config_["ga"]["leader"]["pop_size"],
-        eliminate_duplicates=True,
-    )
-    callback = ProgressCallback()
+    # Checkpointed every generation so a SLURM time-limit kill loses at most
+    # the in-progress generation, not the whole run. The checkpoint holds the
+    # algorithm's state (population, generation count, RNG, ...) but not its
+    # `problem` -- `leader` here is memmapped over follower_data whenever
+    # n_jobs != 1, and that memmap can't be pickled by any pickler, dill
+    # included. So the freshly built `leader` above is reattached on resume
+    # too, and best_objective/best_coefficients are restored onto it
+    # explicitly since they live on the problem, not the algorithm. See
+    # bilevel.checkpoint and README.md "Resuming after a time-limit kill".
+    checkpoint_path = output_dir / "checkpoint.pkl"
+    state = load_checkpoint(checkpoint_path)
 
-    logging.info(
-        "── Starting leader GA  (pop=%d  n_gen=%d) ──",
-        config_["ga"]["leader"]["pop_size"],
-        config_["ga"]["leader"]["n_gen"],
-    )
+    if state is not None:
+        leader_algo = state["algorithm"]
+        leader_algo.problem = leader
+        leader.best_objective    = state["best_objective"]
+        leader.best_coefficients = state["best_coefficients"]
+        callback = leader_algo.callback
+        callback._t0 = time.time()
+        leader_algo.start_time = time.time()
+        logging.info(
+            "── Resuming leader GA from generation %d / %d ──",
+            leader_algo.n_gen, config_["ga"]["leader"]["n_gen"],
+        )
+    else:
+        leader_algo = GA(
+            pop_size=config_["ga"]["leader"]["pop_size"],
+            eliminate_duplicates=True,
+        )
+        callback = ProgressCallback()
+        leader_algo.setup(
+            leader,
+            termination=("n_gen", config_["ga"]["leader"]["n_gen"]),
+            callback=callback,
+            seed=config_.get("seed", 1),
+            verbose=False,          # we handle logging ourselves
+        )
+        logging.info(
+            "── Starting leader GA  (pop=%d  n_gen=%d) ──",
+            config_["ga"]["leader"]["pop_size"],
+            config_["ga"]["leader"]["n_gen"],
+        )
+
     t_start = time.time()
 
     try:
-        res = minimize(
-            leader,
-            leader_algo,
-            ("n_gen", config_["ga"]["leader"]["n_gen"]),
-            callback=callback,
-            verbose=False,          # we handle logging ourselves
-        )
+        while leader_algo.has_next():
+            leader_algo.next()
+            save_checkpoint(checkpoint_path, leader_algo, leader)
+        res = leader_algo.result()
     finally:
         leader.cleanup()
+
+    # Optimisation ran to completion — the checkpoint is no longer needed,
+    # and leaving it behind would make a fresh `sbatch` resubmission for a
+    # new run silently resume this finished one instead.
+    if checkpoint_path.exists():
+        checkpoint_path.unlink()
 
     elapsed = time.time() - t_start
     logging.info("── Optimisation complete in %.1f s ──", elapsed)

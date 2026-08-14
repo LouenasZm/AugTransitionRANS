@@ -313,6 +313,137 @@ def test_leader_best_tracking():
     assert leader.best_objective >= 0
 
 
+def _build_tiny_leader(seed_hint, **leader_kwargs):
+    """LeaderGA + GA pair for checkpoint tests (small enough to run fast)."""
+    from bilevel_optim import LeaderGA
+    from pymoo.algorithms.soo.nonconvex.ga import GA
+
+    fd, ld, train_cases, val_cases, bounds = make_synthetic_data(
+        cases=("caseA", "caseB", "caseC"),
+        n_features=4,
+        rng=np.random.default_rng(seed_hint),
+    )
+    kwargs = dict(n_jobs=1, use_memmap=False)
+    kwargs.update(leader_kwargs)
+    leader = LeaderGA(
+        leader_data=ld, follower_data=fd,
+        validation_cases=val_cases, training_cases=train_cases,
+        variables=["uu"], n_coefficients=4, bounds=bounds,
+        follower_pop_size=10, follower_n_gen=5,
+        **kwargs,
+    )
+    algo = GA(pop_size=6, eliminate_duplicates=True)
+    return leader, algo
+
+
+def test_checkpoint_roundtrip():
+    """save_checkpoint/load_checkpoint round-trip preserves algorithm state.
+
+    `problem` is deliberately excluded from the pickle (see
+    bilevel.checkpoint docstring) so best_objective/best_coefficients are
+    carried in the checkpoint dict alongside the algorithm, and the caller
+    is responsible for reattaching a problem instance after loading.
+    """
+    import tempfile
+    from bilevel.checkpoint import save_checkpoint, load_checkpoint
+
+    leader, algo = _build_tiny_leader(seed_hint=10)
+    algo.setup(leader, termination=("n_gen", 4), seed=1, verbose=False)
+
+    for _ in range(2):
+        algo.next()
+
+    with tempfile.TemporaryDirectory() as d:
+        ckpt_path = os.path.join(d, "checkpoint.pkl")
+        save_checkpoint(ckpt_path, algo, leader)
+
+        assert os.path.exists(ckpt_path)
+        state = load_checkpoint(ckpt_path)
+        assert state is not None
+        assert state["algorithm"].problem is None    # problem excluded from the pickle
+        assert state["algorithm"].n_gen == algo.n_gen
+        assert state["best_objective"] == leader.best_objective
+        np.testing.assert_array_equal(
+            state["algorithm"].pop.get("X"), algo.pop.get("X")
+        )
+
+        # a missing checkpoint file must return None, not raise
+        assert load_checkpoint(os.path.join(d, "does-not-exist.pkl")) is None
+
+    leader.cleanup()
+
+
+def test_checkpoint_survives_memmapped_follower_data():
+    """Regression test: n_jobs != 1 memory-maps follower_data (leader.py), which
+    embeds a raw mmap.mmap object in LeaderGA — unpicklable by any pickler,
+    dill included, since it wraps a live OS file mapping. save_checkpoint
+    must not choke on this (it excludes `problem` from the pickle entirely)."""
+    import tempfile
+    from bilevel.checkpoint import save_checkpoint, load_checkpoint
+
+    leader, algo = _build_tiny_leader(seed_hint=30, n_jobs=2, use_memmap=True)
+    algo.setup(leader, termination=("n_gen", 2), seed=1, verbose=False)
+    algo.next()
+
+    with tempfile.TemporaryDirectory() as d:
+        ckpt_path = os.path.join(d, "checkpoint.pkl")
+        save_checkpoint(ckpt_path, algo, leader)    # must not raise
+        state = load_checkpoint(ckpt_path)
+        assert state["algorithm"].n_gen == algo.n_gen
+
+    leader.cleanup()
+
+
+def test_resume_continues_from_checkpoint():
+    """A save/load round-trip preserves state exactly, and the resumed run
+    reaches the same generation budget as an uninterrupted one.
+
+    Note: this does *not* assert the two runs land on the same
+    best_objective — LeaderGA's follower-level DE solves
+    (leader.py:_solve_single_follower) are not seeded, so they're
+    non-deterministic run-to-run independently of checkpointing. What the
+    checkpoint mechanism is responsible for, and what's verified here, is
+    that pickling/unpickling the algorithm loses none of its state and that
+    the resumed loop keeps advancing correctly to completion.
+    """
+    import tempfile
+    from bilevel.checkpoint import save_checkpoint, load_checkpoint
+
+    leader, algo = _build_tiny_leader(seed_hint=20)
+    algo.setup(leader, termination=("n_gen", 4), seed=1, verbose=False)
+    for _ in range(2):
+        algo.next()
+
+    pop_x_before = algo.pop.get("X").copy()
+    n_gen_before = algo.n_gen
+
+    with tempfile.TemporaryDirectory() as d:
+        ckpt_path = os.path.join(d, "checkpoint.pkl")
+        save_checkpoint(ckpt_path, algo, leader)
+
+        # simulate a fresh process: rebuild the problem, reload the algorithm
+        leader_c, _ = _build_tiny_leader(seed_hint=20)
+        state = load_checkpoint(ckpt_path)
+        resumed = state["algorithm"]
+        resumed.problem = leader_c
+        leader_c.best_objective    = state["best_objective"]
+        leader_c.best_coefficients = state["best_coefficients"]
+
+        # round-tripping through the checkpoint must not have altered state
+        assert resumed.n_gen == n_gen_before
+        np.testing.assert_array_equal(resumed.pop.get("X"), pop_x_before)
+
+        while resumed.has_next():
+            resumed.next()
+        leader_c.cleanup()
+
+    assert resumed.n_gen == 5    # n_gen is a "next generation" counter: 4 completed -> 5
+    assert leader_c.best_objective < np.inf
+    assert leader_c.best_coefficients.shape == (4,)
+
+    leader.cleanup()
+
+
 def test_resolve_n_jobs():
     """resolve_n_jobs: int passthrough and 'auto' SLURM-aware detection."""
     from bilevel.hpc_utils import resolve_n_jobs
@@ -356,6 +487,9 @@ TESTS = [
     ("OptimizationCallback: required fields",     test_follower_callback_fields),
     ("LeaderGA: one generation cycle",            test_leader_one_generation),
     ("LeaderGA: best tracking",                   test_leader_best_tracking),
+    ("checkpoint: save/load round-trip",          test_checkpoint_roundtrip),
+    ("checkpoint: survives memmapped follower_data", test_checkpoint_survives_memmapped_follower_data),
+    ("checkpoint: resume continues correctly",    test_resume_continues_from_checkpoint),
     ("resolve_n_jobs: int passthrough + SLURM auto-detect", test_resolve_n_jobs),
 ]
 

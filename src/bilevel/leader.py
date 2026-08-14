@@ -27,7 +27,7 @@ import logging
 import os
 import shutil
 import tempfile
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from joblib import Parallel, delayed, dump, load
@@ -37,8 +37,10 @@ from pymoo.core.problem import Problem
 from pymoo.operators.sampling.lhs import LHS
 from pymoo.optimize import minimize
 from pymoo.termination.default import DefaultSingleObjectiveTermination
+from threadpoolctl import threadpool_limits
 
 from .follower import ElasticNetFollower, OptimizationCallback
+from .hpc_utils import resolve_n_jobs
 from .loss import compute_normalised_loss
 
 logger = logging.getLogger(__name__)
@@ -103,7 +105,11 @@ def run_follower_worker(
         period=period,
         n_max_gen=n_gen,    # hard cap — never exceeds your original budget
     )
-    res = minimize(problem, algorithm, termination, verbose=False)
+    # Cap BLAS threads to 1 per worker — with many workers running side by
+    # side (e.g. under joblib on a shared HPC node), each spawning its own
+    # OpenBLAS/MKL thread pool would oversubscribe the node's cores.
+    with threadpool_limits(limits=1):
+        res = minimize(problem, algorithm, termination, verbose=False)
     return res.X
 
 
@@ -140,12 +146,18 @@ class LeaderGA(Problem):
         Number of generations for each follower solve.
     n_jobs:
         Number of parallel jobs for follower solves.  Use ``1`` to disable
-        parallelism (safer on memory-constrained machines).
+        parallelism (safer on memory-constrained machines). Use ``"auto"`` to
+        pick up the core count of the current SLURM allocation (via
+        ``SLURM_CPUS_PER_TASK``/``SLURM_JOB_CPUS_PER_NODE``) when running
+        under ``sbatch``/``srun``, falling back to the local machine's core
+        count otherwise — see ``hpc_utils.resolve_n_jobs``.
     s_star_threshold:
         S* mask threshold shared by both levels.
     use_memmap:
         If ``True``, dump follower_data to a memory-mapped file so worker
-        processes share it without duplicating RAM.
+        processes share it without duplicating RAM. If ``None`` (default),
+        this is derived automatically as ``n_jobs != 1`` after resolving
+        ``n_jobs``.
     """
 
     def __init__(
@@ -167,9 +179,9 @@ class LeaderGA(Problem):
         follower_de_variant:  str   = "DE/rand/1/bin",
         follower_de_cr:       float = 0.9,
         follower_de_f:        float = 0.8,
-        n_jobs:               int   = 1,
+        n_jobs:               Union[int, str] = 1,
         s_star_threshold:     float = 0.8,
-        use_memmap:           bool  = True,
+        use_memmap:           Optional[bool] = None,
     ) -> None:
         hl, hu = hyperparam_bounds
         super().__init__(
@@ -192,7 +204,7 @@ class LeaderGA(Problem):
         self.follower_de_variant = follower_de_variant
         self.follower_de_cr     = follower_de_cr
         self.follower_de_f      = follower_de_f
-        self.n_jobs             = n_jobs
+        self.n_jobs             = resolve_n_jobs(n_jobs)
         self.s_star_threshold  = s_star_threshold
 
         # Best-so-far tracking
@@ -200,8 +212,10 @@ class LeaderGA(Problem):
         self.best_coefficients: Optional[np.ndarray] = None
 
         # Optionally memory-map follower data for parallel workers
+        if use_memmap is None:
+            use_memmap = self.n_jobs != 1
         self._temp_folder: Optional[str] = None
-        if use_memmap and n_jobs != 1:
+        if use_memmap and self.n_jobs != 1:
             self._temp_folder   = tempfile.mkdtemp()
             _mmap_path          = os.path.join(self._temp_folder, "follower_data.mmap")
             dump(follower_data, _mmap_path)
@@ -358,11 +372,12 @@ class LeaderGA(Problem):
             period=self.follower_period,
             n_max_gen=self.follower_n_gen,
         )
-        res = minimize(
-            problem, algorithm,
-            termination,
-            verbose=False,
-        )
+        with threadpool_limits(limits=1):
+            res = minimize(
+                problem, algorithm,
+                termination,
+                verbose=False,
+            )
         return res.X
 
     # ------------------------------------------------------------------

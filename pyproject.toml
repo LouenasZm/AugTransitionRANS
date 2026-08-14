@@ -14,6 +14,7 @@ dependencies = [
     "scikit-learn",
     "pymoo",
     "joblib",
+    "threadpoolctl",
 ]
 
 [project.optional-dependencies]

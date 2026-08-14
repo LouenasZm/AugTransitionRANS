@@ -71,7 +71,7 @@ Main dependencies:
 The repository uses a source layout, so the easiest local setup is:
 
 ```bash
-git clone <your-github-repository-url>
+git clone git@github.com:LouenasZm/AugTransitionRANS.git
 cd AugTransitionRANS
 python3 -m venv .venv
 source .venv/bin/activate
@@ -95,6 +95,27 @@ Typical workflow:
 4. Run `pymoo.optimize.minimize(...)` on either problem.
 
 See `tests/test_bilevel.py` for a self-contained synthetic example of the full pipeline.
+
+## Running on an HPC cluster (SLURM)
+
+`LeaderGA` parallelises follower solves locally with `joblib` — each task is pure
+Python/NumPy (surrogate `.predict()` calls plus a pymoo DE run), so this already works
+correctly inside a single-node SLURM allocation: `sbatch`/`srun` just restrict which
+cores the job's process tree may use, and joblib's workers stay inside that cgroup. No
+MPI or multi-node distributed backend is needed to run on a cluster.
+
+Two things do need to adapt between a laptop and a SLURM job:
+
+- **Worker count.** Set `"n_jobs": "auto"` in your config instead of a hardcoded
+  number. `LeaderGA` will then pick up the job's actual core allocation from
+  `SLURM_CPUS_PER_TASK`/`SLURM_JOB_CPUS_PER_NODE` (falling back to all local cores when
+  not running under SLURM), so the same config works unmodified on your laptop and on
+  the cluster. See `src/bilevel/hpc_utils.py`.
+- **BLAS thread oversubscription.** Each follower solve is wrapped in
+  `threadpoolctl.threadpool_limits(1)`, so `n_jobs` worker processes won't each also
+  spawn their own OpenBLAS/MKL threads and thrash a shared node.
+
+See `examples/CfdDrivenOptim/submit_slurm.sh` for a template `sbatch` script.
 
 ## Testing
 

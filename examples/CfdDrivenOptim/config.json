@@ -160,7 +160,7 @@
         "follower": { "pop_size": 100, "n_gen": 25 }
     },
 
-    "n_jobs":           20,
+    "n_jobs":           "auto",
     "s_star_threshold": 0.6,
     "output_dir":       "results"
 }

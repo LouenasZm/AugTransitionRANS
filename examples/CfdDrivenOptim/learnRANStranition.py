@@ -25,7 +25,9 @@ The most important fields are:
     coefficients.l_bounds / u_bounds  — per-coefficient bounds
     ga.leader.*       — pop_size, n_gen for the leader GA
     ga.follower.*     — pop_size, n_gen for the follower GA
-    n_jobs            — parallel follower solves (-1 = all cores, 1 = serial)
+    n_jobs            — parallel follower solves (-1 = all cores, 1 = serial,
+                         "auto" = SLURM allocation if run under sbatch/srun,
+                         else all local cores)
     s_star_threshold  — S* mask threshold (default 0.8)
     output_dir        — where to write results JSON and logs
 """
@@ -137,7 +139,6 @@ def run(config_: dict) -> dict:
         follower_n_gen    = config_["ga"]["follower"]["n_gen"],
         n_jobs            = config_.get("n_jobs", 1),
         s_star_threshold  = config_.get("s_star_threshold", 0.8),
-        use_memmap        = config_.get("n_jobs", 1) != 1,
     )
 
     # ------------------------------------------------------------------

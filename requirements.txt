@@ -3,4 +3,5 @@ scipy
 scikit-learn
 pymoo
 joblib
+threadpoolctl
 pytest

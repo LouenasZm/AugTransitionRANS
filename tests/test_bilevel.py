@@ -17,6 +17,7 @@ The test verifies:
     4. LeaderGA                — one full bi-level evaluation cycle
 """
 
+import os
 import sys
 import traceback
 import numpy as np
@@ -312,6 +313,36 @@ def test_leader_best_tracking():
     assert leader.best_objective >= 0
 
 
+def test_resolve_n_jobs():
+    """resolve_n_jobs: int passthrough and 'auto' SLURM-aware detection."""
+    from bilevel.hpc_utils import resolve_n_jobs
+
+    assert resolve_n_jobs(4) == 4
+    assert resolve_n_jobs(-1) == -1
+    assert resolve_n_jobs(1) == 1
+
+    saved = {
+        k: os.environ.pop(k, None)
+        for k in ("SLURM_CPUS_PER_TASK", "SLURM_JOB_CPUS_PER_NODE")
+    }
+    try:
+        os.environ["SLURM_CPUS_PER_TASK"] = "8"
+        assert resolve_n_jobs("auto") == 8
+
+        del os.environ["SLURM_CPUS_PER_TASK"]
+        os.environ["SLURM_JOB_CPUS_PER_NODE"] = "12(x2)"
+        assert resolve_n_jobs("auto") == 12
+
+        del os.environ["SLURM_JOB_CPUS_PER_NODE"]
+        assert resolve_n_jobs("auto") > 0   # falls back to local core count
+    finally:
+        for k, v in saved.items():
+            if v is not None:
+                os.environ[k] = v
+            else:
+                os.environ.pop(k, None)
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Entry point
 # ─────────────────────────────────────────────────────────────────────────────
@@ -325,6 +356,7 @@ TESTS = [
     ("OptimizationCallback: required fields",     test_follower_callback_fields),
     ("LeaderGA: one generation cycle",            test_leader_one_generation),
     ("LeaderGA: best tracking",                   test_leader_best_tracking),
+    ("resolve_n_jobs: int passthrough + SLURM auto-detect", test_resolve_n_jobs),
 ]
 
 if __name__ == "__main__":

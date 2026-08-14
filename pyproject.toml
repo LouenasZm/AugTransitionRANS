@@ -15,6 +15,7 @@ dependencies = [
     "pymoo",
     "joblib",
     "threadpoolctl",
+    "dill",
 ]
 
 [project.optional-dependencies]

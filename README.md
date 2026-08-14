@@ -117,6 +117,21 @@ Two things do need to adapt between a laptop and a SLURM job:
 
 See `examples/CfdDrivenOptim/submit_slurm.sh` for a template `sbatch` script.
 
+### Resuming after a time-limit kill
+
+If a SLURM job hits its `--time` limit before the leader GA finishes, `learnRANStranition.py`
+checkpoints the leader GA to `<output_dir>/checkpoint.pkl` after every generation (population,
+generation count, best-so-far hyperparameters/coefficients, and RNG state — see
+`src/bilevel/checkpoint.py`), and automatically resumes from that file the next time it's run.
+No `--resume` flag is needed; the checkpoint's presence is what drives the resume.
+
+The template `submit_slurm.sh` requests `#SBATCH --requeue` plus `#SBATCH --signal=B:USR1@120`,
+so SLURM resubmits the same job automatically when it's killed for exceeding the time limit, and
+it picks the checkpoint back up with no manual intervention (provided your site permits
+`--requeue`). If it doesn't, the same recovery happens by resubmitting by hand —
+`sbatch submit_slurm.sh` again. The checkpoint is deleted once a run completes normally, so a
+fresh submission for a new run never accidentally resumes a finished one.
+
 ## Testing
 
 Run the smoke tests with:
